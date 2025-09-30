@@ -32,7 +32,7 @@
 
 <script setup>
 import Highcharts from 'highcharts';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import api from "@/api.js";
 
 const props = defineProps({
@@ -43,7 +43,7 @@ const props = defineProps({
 });
 const isLoading = ref(false);
 
-const fetchData = async (id = props.stockId) => {
+const fetchData = async (id) => {
   if (!id) {
     return;
   }
@@ -60,7 +60,9 @@ const fetchData = async (id = props.stockId) => {
   }
 };
 
-defineExpose({ fetchData, isLoading });
+watch(() => props.stockId, (newId) => {
+  fetchData(newId);
+}, { immediate: true });
 
 function drawClock(divName, data) {
   const now = data.nowPrice;

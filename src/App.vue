@@ -14,50 +14,42 @@
 
     <!-- Main content area -->
     <div class="flex-fill">
+      <!-- 左側功能選單 -->
       <!-- Tab navigation for mobile -->
       <nav class="nav nav-tabs d-lg-none nav-fill">
         <a class="nav-link" :class="{ active: currentComponent === 'FiveLine' }" href="#" @click.prevent="currentComponent = 'FiveLine'">五線譜</a>
         <a class="nav-link" :class="{ active: currentComponent === 'MonthlyRevenue' }" href="#" @click.prevent="currentComponent = 'MonthlyRevenue'">月營收</a>
       </nav>
 
-      <!-- Component content -->
+      <!-- 右邊區塊 -->
       <div class="p-4">
+        <!-- 最上面的查詢框 -->
         <div class="mb-4">
           <div class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              v-model="stockInput"
-              :placeholder="placeholders[currentComponent]"
-              @keydown.enter.prevent="handleSearch"
-            >
-            <button
-              class="btn btn-primary"
-              @click="handleSearch"
-              :disabled="isLoading"
-            >
+            <input type="text" class="form-control" v-model="stockInput" :placeholder="placeholders[currentComponent]" @keydown.enter.prevent="handleSearch">
+            <button class="btn btn-primary" @click="handleSearch" :disabled="isLoading">
               查詢
             </button>
           </div>
         </div>
-
-        <component
-          :is="components[currentComponent]"
-          ref="activeComponent"
-          :stock-id="stockInput"
-        />
+        <!-- 主要功能區 -->
+        <keep-alive>
+          <component
+            :is="components[currentComponent]"
+            :stock-id="stockIdToSearch"
+          />
+        </keep-alive>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref } from 'vue';
 import MonthlyRevenue from './components/MonthlyRevenue.vue';
 import FiveLine from './components/FiveLine.vue';
 
-const currentComponent = ref('FiveLine');
-const activeComponent = ref(null);
+const currentComponent = ref('MonthlyRevenue');
 
 const components = {
   MonthlyRevenue,
@@ -71,16 +63,11 @@ const placeholders = {
   FiveLineQuery: '輸入股票代碼'
 };
 const stockInput = ref(defaultStockId);
-
-const isLoading = computed(() => activeComponent.value?.isLoading?.value ?? false);
-
-watch(currentComponent, async () => {
-  await nextTick();
-  activeComponent.value?.fetchData?.(stockInput.value);
-}, { immediate: true });
+const stockIdToSearch = ref(defaultStockId);
+const isLoading = ref(false); // Note: isLoading is now local and not reactive from child
 
 const handleSearch = () => {
-  activeComponent.value?.fetchData?.(stockInput.value);
+  stockIdToSearch.value = stockInput.value;
 };
 </script>
 

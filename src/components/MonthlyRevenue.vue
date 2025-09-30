@@ -132,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import api from "@/api.js";
 
 const props = defineProps({
@@ -144,7 +144,7 @@ const props = defineProps({
 const apiData = ref(null);
 const isLoading = ref(false);
 
-const fetchData = async (id = props.stockId) => {
+const fetchData = async (id) => {
   if (!id) {
     return;
   }
@@ -159,7 +159,9 @@ const fetchData = async (id = props.stockId) => {
   }
 };
 
-defineExpose({ fetchData, isLoading });
+watch(() => props.stockId, (newId) => {
+  fetchData(newId);
+}, { immediate: true });
 
 const chartOptions1 = computed(() => ({
   chart: {
