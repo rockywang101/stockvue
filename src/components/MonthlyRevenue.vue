@@ -150,7 +150,7 @@ const fetchData = async (id) => {
   }
   isLoading.value = true;
   try {
-    apiData.value = await api.get(`/api/test?stockId=${id}`);
+    apiData.value = await api.get(`/api/apiMonthRevenue?stockId=${id}`);
   } catch (error) {
     console.error('Error fetching data:', error);
     apiData.value = { error: error.message };
