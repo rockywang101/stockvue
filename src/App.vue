@@ -4,10 +4,13 @@
     <div class="bg-light border-end p-3 d-none d-lg-block" style="width: 200px; flex-shrink: 0;">
       <nav class="nav nav-pills flex-column">
         <button class="nav-link" :class="{ active: currentComponent === 'FiveLine' }" @click="currentComponent = 'FiveLine'">
-          五線譜 
+          無敵五線譜
         </button>
         <button class="nav-link" :class="{ active: currentComponent === 'MonthlyRevenue' }" @click="currentComponent = 'MonthlyRevenue'">
           月營收查詢
+        </button>
+        <button class="nav-link" :class="{ active: currentComponent === 'MonthlyRevenueNew' }" @click="currentComponent = 'MonthlyRevenueNew'">
+          最新月營收
         </button>
       </nav>
     </div>
@@ -18,7 +21,8 @@
       <!-- Tab navigation for mobile -->
       <nav class="nav nav-tabs d-lg-none nav-fill">
         <a class="nav-link" :class="{ active: currentComponent === 'FiveLine' }" href="#" @click.prevent="currentComponent = 'FiveLine'">五線譜</a>
-        <a class="nav-link" :class="{ active: currentComponent === 'MonthlyRevenue' }" href="#" @click.prevent="currentComponent = 'MonthlyRevenue'">月營收</a>
+        <a class="nav-link" :class="{ active: currentComponent === 'MonthlyRevenue' }" href="#" @click.prevent="currentComponent = 'MonthlyRevenue'">月營收查詢</a>
+        <a class="nav-link" :class="{ active: currentComponent === 'MonthlyRevenueNew' }" href="#" @click.prevent="currentComponent = 'MonthlyRevenueNew'">最新月營收</a>
       </nav>
 
       <!-- 右邊區塊 -->
@@ -47,16 +51,18 @@
 <script setup>
 import { ref } from 'vue';
 import MonthlyRevenue from './components/MonthlyRevenue.vue';
+import MonthlyRevenueNew from './components/MonthlyRevenueNew.vue';
 import FiveLine from './components/FiveLine.vue';
 
 const currentComponent = ref('MonthlyRevenue');
 
 const components = {
   MonthlyRevenue,
+  MonthlyRevenueNew,
   FiveLine
 };
 
-const defaultStockId = '8462';
+const defaultStockId = '8422';
 const placeholders = {
   FiveLine: '輸入股票代碼',
   MonthlyRevenue: 'Enter stock ID',
