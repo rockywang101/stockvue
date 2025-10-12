@@ -39,6 +39,7 @@
         <!-- 主要功能區 -->
         <keep-alive>
           <component
+            ref="currentComponentRef"
             :is="components[currentComponent]"
             :stock-id="stockIdToSearch"
           />
@@ -54,7 +55,8 @@ import MonthlyRevenue from './components/MonthlyRevenue.vue';
 import MonthlyRevenueNew from './components/MonthlyRevenueNew.vue';
 import FiveLine from './components/FiveLine.vue';
 
-const currentComponent = ref('MonthlyRevenue');
+const currentComponent = ref('MonthlyRevenueNew');
+const currentComponentRef = ref(null);
 
 const components = {
   MonthlyRevenue,
@@ -62,7 +64,7 @@ const components = {
   FiveLine
 };
 
-const defaultStockId = '8422';
+const defaultStockId = '6951';
 const placeholders = {
   FiveLine: '輸入股票代碼',
   MonthlyRevenue: 'Enter stock ID',
@@ -73,7 +75,16 @@ const stockIdToSearch = ref(defaultStockId);
 const isLoading = ref(false); // Note: isLoading is now local and not reactive from child
 
 const handleSearch = () => {
-  stockIdToSearch.value = stockInput.value;
+  const newStockId = stockInput.value;
+  const oldStockId = stockIdToSearch.value;
+  stockIdToSearch.value = newStockId;
+
+  // If the stock ID hasn't changed, the watch listener in the child component won't fire.
+  // In this case, we need to manually trigger the data fetch.
+  // We also need to ensure the component is mounted and has the fetchData method.
+  if (newStockId === oldStockId && currentComponentRef.value && typeof currentComponentRef.value.fetchData === 'function') {
+    currentComponentRef.value.fetchData(newStockId);
+  }
 };
 </script>
 

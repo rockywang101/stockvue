@@ -64,6 +64,8 @@ watch(() => props.stockId, (newId) => {
   fetchData(newId);
 }, { immediate: true });
 
+defineExpose({ fetchData });
+
 function drawClock(divName, data) {
   const now = data.nowPrice;
   const sdArray = data.sdArray;

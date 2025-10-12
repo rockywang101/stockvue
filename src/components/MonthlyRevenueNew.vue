@@ -9,31 +9,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-const stackLabelsData = [
-  { totalText: '11.32', percentageText: '' },
-  { totalText: '13.23', percentageText: '+16.87%' },
-  { totalText: '12.53', percentageText: '-5.29%' },
-  { totalText: '12.12', percentageText: '-3.27%' },
-  { totalText: '10.83', percentageText: '-10.64%' },
-  { totalText: '10.81', percentageText: '-0.18%' },
-  { totalText: '10.60', percentageText: '-1.94%' },
-  { totalText: '12.33', percentageText: '+16.32%' },
-  { totalText: '9.12', percentageText: '-26.03%' },
-  { totalText: '10.73', percentageText: '+17.65%' },
-  { totalText: '8.00', percentageText: '+67.71%' }
-];
+const props = defineProps({
+  stockId: {
+    type: String,
+    required: true
+  }
+});
 
 const chartOptions = ref({
   chart: {
     type: 'column'
   },
   title: {
-    text: '8422 可寧衛 EPS'
+    text: ''
   },
   xAxis: {
-    categories: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025']
+    categories: []
   },
   yAxis: {
     min: 0,
@@ -45,26 +38,18 @@ const chartOptions = ref({
       style: {
         fontWeight: 'bold',
         color: 'gray',
-        textOutline: 'none'
-      },
-      formatter: function() {
-        const data = stackLabelsData[this.x];
-        if (data) {
-          const percentageText = data.percentageText;
-          let color = 'blue';
-          if (percentageText.startsWith('-')) {
-            color = 'red';
-          }
-          return `<span style="font-weight: bold;">${data.totalText}</span><br/><span style="color:${color}; font-weight: bold;">${percentageText}</span>`;
-        }
-        return '';
+        textOutline: 'none',
+        fontSize: '18px' // stack 最上面那個加總起來的數字
       }
     }
   },
   legend: {
     align: 'center',
     verticalAlign: 'bottom',
-    layout: 'horizontal'
+    layout: 'horizontal',
+    itemStyle: {
+      fontSize: '18px'
+    }
   },
   tooltip: {
     headerFormat: '<b>{point.x}</b><br/>',
@@ -77,7 +62,8 @@ const chartOptions = ref({
         enabled: true,
         color: 'white',
         style: {
-          textOutline: 'none'
+          textOutline: 'none',
+          fontSize: '12px' // 每個季區塊裡面的數字
         }
       }
     }
@@ -85,24 +71,36 @@ const chartOptions = ref({
   credits: {
     enabled: false
   },
-  series: [{
-    name: 'Q1',
-    data: [2.74, 3.55, 3.1, 3.71, 2.74, 2.54, 3.42, 2.41, 2.88, 2.26, 3.97],
-    color: '#F7A35C' // Orange
-  }, {
-    name: 'Q2',
-    data: [2.58, 3.4, 3.18, 3.09, 2.77, 2.29, 2.43, 3.29, 2.83, 2.51, 4.03],
-    color: '#90EE90' // Green
-  }, {
-    name: 'Q3',
-    data: [2.99, 3.43, 2.98, 2.7, 2.25, 3.01, 2.59, 3.09, 1.36, 2.6, 0],
-    color: '#8085E9' // Purple
-  }, {
-    name: 'Q4',
-    data: [3.01, 2.85, 3.27, 2.62, 3.07, 2.97, 2.16, 3.54, 2.05, 3.36, 0],
-    color: '#7CB5EC' // Blue
-  }]
+  series: []
 });
+
+const fetchData = async (stockId) => {
+  if (!stockId) return;
+  try {
+    const response = await fetch(`http://localhost:5000/api/apiMonthRevenueNew?stockId=${stockId}`);
+    const data = await response.json();
+    
+    const yearNum = 10
+
+    const slicedQuarterlyYears = data.quarterlyYears.slice(-yearNum);
+    const slicedQuarterlySeries = data.quarterlySeries.map(series => ({
+      ...series,
+      data: series.data.slice(-yearNum)
+    }));
+
+    chartOptions.value.title.text = data.stockName + ' 每季營收';
+    chartOptions.value.xAxis.categories = slicedQuarterlyYears;
+    chartOptions.value.series = slicedQuarterlySeries.reverse();
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
+
+watch(() => props.stockId, (newId) => {
+  fetchData(newId);
+}, { immediate: true });
+
+defineExpose({ fetchData });
 </script>
 
 <style scoped>

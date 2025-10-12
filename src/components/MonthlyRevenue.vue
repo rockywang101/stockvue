@@ -163,6 +163,8 @@ watch(() => props.stockId, (newId) => {
   fetchData(newId);
 }, { immediate: true });
 
+defineExpose({ fetchData });
+
 const chartOptions1 = computed(() => ({
   chart: {
     type: 'line'
